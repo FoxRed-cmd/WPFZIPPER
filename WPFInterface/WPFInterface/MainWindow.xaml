@@ -1,0 +1,86 @@
+﻿<Window x:Class="WPFInterface.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPFInterface"
+        mc:Ignorable="d"
+        Title="Молния" MinWidth="320" MinHeight="350" Height="420" Width="400" Background="#FF4D5AAC" SizeChanged="Window_SizeChanged" Loaded="Window_Loaded">
+    <Window.Resources>
+        <ContextMenu x:Key="FileContext">
+            <MenuItem Header="Создать ZIP" Click="MenuItem_Click">
+                <MenuItem.Icon>
+                    <Image Source="free-icon-lightning-bolt-3325155 (2).png"/>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Извлечь ZIP" Click="MenuItem_Click_1">
+                <MenuItem.Icon>
+                    <Image Source="free-icon-zipper-2088946.png"></Image>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Свернуть в трей" Click="MenuItem_Click_3" Checked="MenuItem_Checked">
+                <MenuItem.Icon>
+                    <Image Source="free-icon-reduce-5068508.png"></Image>
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Выход" Click="MenuItem_Click_2">
+                <MenuItem.Icon>
+                    <Image Source="free-icon-logout-5087631.png"></Image>
+                </MenuItem.Icon>
+            </MenuItem>
+        </ContextMenu>
+    </Window.Resources>
+    <Grid x:Name="contextRow">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="35"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Rectangle x:Name="rect1" Fill="#FF36418B" Grid.Row="0">
+        </Rectangle>
+        <WrapPanel Margin="5,0">
+            <Button x:Name="btn1" Content="Файл" Margin="2" Click="btn1_Click" Background="{x:Null}" BorderBrush="{x:Null}">
+            </Button>
+            <Button x:Name="btn2" Content="Настройки" Margin="2" Background="{x:Null}" BorderBrush="{x:Null}" Click="btn2_Click"></Button>
+            <Button x:Name="btn4" Content="В трей" Margin="2" Background="{x:Null}" BorderBrush="{x:Null}" Click="btn4_Click"></Button>
+            <Button x:Name="btn3" Content="О приложении" Margin="2" Background="{x:Null}" BorderBrush="{x:Null}" Click="btn3_Click"></Button>
+        </WrapPanel>
+        <WrapPanel Grid.Row="1">
+            <CheckBox x:Name="chBox2" FontSize="12" Content="Загрузить на Mega" Margin="10"></CheckBox>
+        </WrapPanel>
+        <TabControl Grid.Row="2" Background="#FF4D5AAC" Margin="10">
+            <TabItem x:Name="tab1" Header="Создать ZIP">
+                <Grid Margin="10" Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock x:Name="text1" FontWeight="Bold" FontSize="15" Margin="10" TextAlignment="Center" Text="Перетащите в область для сжатия"/>
+                    <Image Grid.Row="1" Source="Resources/free-icon-zip-1112204.png" Margin="10"/>
+                    <Border  
+                BorderBrush="Black" 
+                BorderThickness="2" 
+                CornerRadius="10"
+                Grid.RowSpan="2" 
+                Background="#004D5AAC" AllowDrop="True" Drop="Border_Drop"/>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="tab2" Header="Извлечь ZIP">
+                <Grid Margin="10" Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock x:Name="text2" FontWeight="Bold" FontSize="15" Margin="10" TextAlignment="Center" Text="Перетащите в область для извлечения"/>
+                    <Image Grid.Row="1" Source="Resources/free-icon-zip-1112204.png" Margin="10"/>
+                    <Border  
+                BorderBrush="Black" 
+                BorderThickness="2" 
+                CornerRadius="10"
+                Grid.RowSpan="2" 
+                Background="#004D5AAC" AllowDrop="True" Drop="Border_Drop_1"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
