@@ -30,7 +30,7 @@ namespace WPFInterface
 		{
 			NameValueCollection allAppSettings = ConfigurationManager.AppSettings;
 			txt3.Text = allAppSettings[key4];
-			txt4.Password = allAppSettings[key5];
+			txt4.Password = Cript.DeShifrovka(allAppSettings[key5]);
 			txt5.Text = allAppSettings[key6];
 			string notifyChecked = allAppSettings[key3];
 			if (notifyChecked == "true")
@@ -47,6 +47,7 @@ namespace WPFInterface
 
 		private void btn1_Click(object sender, RoutedEventArgs e)
 		{
+			string password = Cript.Shifrovka(txt4.Password);
 			int indexFolderPathMega = txt5.Text.LastIndexOf('/');
 			string pathFolderMega = txt5.Text.Remove(0, indexFolderPathMega + 1);
 			XmlDocument document = new XmlDocument();
@@ -60,7 +61,7 @@ namespace WPFInterface
 			XmlElement element5 = node.SelectSingleNode(string.Format("//add[@key='{0}']", key5)) as XmlElement;
 			if (element5 != null)
 			{
-				element5.SetAttribute("value", txt4.Password);
+				element5.SetAttribute("value", password);
 			}
 			XmlElement element6 = node.SelectSingleNode(string.Format("//add[@key='{0}']", key6)) as XmlElement;
 			if (element6 != null)

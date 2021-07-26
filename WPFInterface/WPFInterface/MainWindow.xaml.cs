@@ -31,7 +31,7 @@ namespace WPFInterface
 		string pathToZip;
 		static string[] path;
 		public static string folderID;
-		string MegaLogin, MegaFolder;
+		string MegaLogin, MegaFolder, MegaPassword;
 		int count = 0;
 		NotifyIcon notifyIcon1 = new NotifyIcon();
 		NotifyIcon notifyIcon2 = new NotifyIcon();
@@ -124,9 +124,8 @@ namespace WPFInterface
 				{
 					try
 					{
-						NameValueCollection allAppSettings = ConfigurationManager.AppSettings;
 						MegaApiClient megaApiClient = new MegaApiClient();
-						megaApiClient.Login(MegaLogin, allAppSettings["MegaPassword"]);
+						megaApiClient.Login(MegaLogin, MegaPassword);
 
 						pathToZip = SaveFileDialog.FileName;
 						Task task = new Task(MethodZip);
@@ -200,9 +199,9 @@ namespace WPFInterface
 							Process.Start("explorer.exe", $"/select, {SaveFileDialog.FileName}");
 						}
 					}
-					catch (Exception)
+					catch (Exception ex)
 					{
-						System.Windows.MessageBox.Show("При попытке доступа к Mega.io произошла ошибка. Проверьте в настрйках, правильно ли указан логин и пароль или повторите попытку позже.",
+						System.Windows.MessageBox.Show("При попытке доступа к Mega.io произошла ошибка. Проверьте в настрйках, правильно ли указан логин и пароль или повторите попытку позже." + ex.Message,
 							"Ошибка доступа", MessageBoxButton.OK, MessageBoxImage.Error);
 					}
 				}
@@ -242,6 +241,7 @@ namespace WPFInterface
 			Left = double.Parse(allAppSettings["location.Y"]);
 			MegaLogin = allAppSettings["MegaLogin"];
 			MegaFolder = allAppSettings["MegaFolder"];
+			MegaPassword = Cript.DeShifrovka(allAppSettings["MegaPassword"]);
 			string notify = allAppSettings["NotifyFlag"];
 			if (notify == "true")
 			{
