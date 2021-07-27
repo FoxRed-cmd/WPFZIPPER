@@ -23,23 +23,26 @@ namespace WPFInterface
 	public partial class MainWindow : Window
 	{
 		System.Windows.Point point;
-		public string MyProperty { get; set; }
-		public string MyProperty2 { get; set; }
 		bool notifyFlag, saveFlag;
-		List<string> files = new List<string>();
-		readonly List<string> keys = new List<string>() { "location.X", "location.Y" };
+
 		string pathToZip;
 		static string[] path;
 		public static string folderID;
 		string MegaLogin, MegaFolder, MegaPassword;
 		string defZIP, defEXT;
-		int count = 0;
+
+		int count = 0, numberFolder = 0;
+		int resize = 26, widthCompare = 320;
+
 		NotifyIcon notifyIcon1 = new NotifyIcon();
 		NotifyIcon notifyIcon2 = new NotifyIcon();
+
 		OpenFileDialog openFile = new OpenFileDialog();
 		SaveFileDialog SaveFileDialog = new SaveFileDialog();
 		FolderBrowserDialog folderBrowserDialog1 = new FolderBrowserDialog();
 		ContextMenuStrip contextMenu = new ContextMenuStrip();
+
+		List<string> files = new List<string>();
 		List<string> loadi = new List<string>
 		{
 			"Идёт извлечение",
@@ -47,7 +50,7 @@ namespace WPFInterface
 			".",
 			"."
 		};
-		int resize = 26, widthCompare = 320;
+		readonly List<string> keys = new List<string>() { "location.X", "location.Y" };
 
 		public MainWindow()
 		{
@@ -99,7 +102,7 @@ namespace WPFInterface
 			SaveFileDialog.FileOk += (sender, e) =>
 			{
 				defZIP = Directory.GetParent(SaveFileDialog.FileName).FullName;
-				StartZip(Path.GetFileName(SaveFileDialog.FileName));
+				StartZipAsync(Path.GetFileName(SaveFileDialog.FileName));
 			};
 			tab1.GotFocus += (sender, e) =>
 			{
@@ -196,7 +199,7 @@ namespace WPFInterface
 				{
 					zipName = Guid.NewGuid().ToString().Remove(0, 24) + ".zip";
 				}
-				StartZip(zipName);
+				StartZipAsync(zipName);
 			}
 			else
 			{
@@ -274,10 +277,29 @@ namespace WPFInterface
 					{
 						Task task = new Task(() =>
 						{
+							pathToExtract = ExtractFolderPath;
 							string[] nameFolder = Path.GetFileName(path[0]).Split('.');
 							pathToExtract += $@"\{nameFolder[0]}";
-							ZipFile.ExtractToDirectory(path[0], pathToExtract);
-							pathToExtract = ExtractFolderPath;
+							bool flagExists = true;
+							do
+							{
+								numberFolder++;
+								if (Directory.Exists(pathToExtract))
+								{
+									if (!Directory.Exists(pathToExtract + $" ({numberFolder})"))
+									{
+										ZipFile.ExtractToDirectory(path[0], pathToExtract + $" ({numberFolder})");
+										numberFolder = 0;
+										flagExists = false;
+									}
+								}
+								else
+								{
+									ZipFile.ExtractToDirectory(path[0], pathToExtract);
+									numberFolder = 0;
+									flagExists = false;
+								}
+							} while (flagExists);
 						});
 						task.Start();
 
@@ -320,12 +342,31 @@ namespace WPFInterface
 					{
 						Task task = new Task(() =>
 						{
-							foreach (var item in path)
+							foreach (string item in path)
 							{
+								pathToExtract = ExtractFolderPath;
 								string[] nameFolder = Path.GetFileName(item).Split('.');
 								pathToExtract += $@"\{nameFolder[0]}";
-								ZipFile.ExtractToDirectory(item, pathToExtract);
-								pathToExtract = ExtractFolderPath;
+								bool flagExists = true;
+								do
+								{
+									numberFolder++;
+									if (Directory.Exists(pathToExtract))
+									{
+										if (!Directory.Exists(pathToExtract + $" ({numberFolder})"))
+										{
+											ZipFile.ExtractToDirectory(item, pathToExtract + $" ({numberFolder})");
+											numberFolder = 0;
+											flagExists = false;
+										}
+									}
+									else
+									{
+										ZipFile.ExtractToDirectory(item, pathToExtract);
+										numberFolder = 0;
+										flagExists = false;
+									}
+								} while (flagExists);
 							}
 						});
 						task.Start();
@@ -366,7 +407,7 @@ namespace WPFInterface
 			folderBrowserDialog1.Reset();
 		}
 
-		void MethodZip()
+		private void MethodZip()
 		{
 			if (pathToZip != null)
 			{
@@ -417,7 +458,7 @@ namespace WPFInterface
 			}
 		}
 
-		async void StartZip(string arhiveName)
+		private async void StartZipAsync(string arhiveName)
 		{
 			if (chBox2.IsChecked == false)
 			{
@@ -590,7 +631,7 @@ namespace WPFInterface
 					string pathName = Path.GetFileName(path[0]);
 					string[] name = pathName.Split('.');
 					zipName = name[0] + ".zip";
-					StartZip(zipName);
+					StartZipAsync(zipName);
 				}
 				else
 				{
@@ -663,7 +704,7 @@ namespace WPFInterface
 					string pathName = Path.GetFileName(path[0]);
 					string[] name = pathName.Split('.');
 					zipName = name[0] + ".zip";
-					StartZip(zipName);
+					StartZipAsync(zipName);
 				}
 				else
 				{
