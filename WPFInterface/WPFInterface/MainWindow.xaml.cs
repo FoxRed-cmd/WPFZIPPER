@@ -25,13 +25,14 @@ namespace WPFInterface
 		System.Windows.Point point;
 		public string MyProperty { get; set; }
 		public string MyProperty2 { get; set; }
-		bool notifyFlag;
+		bool notifyFlag, saveFlag;
 		List<string> files = new List<string>();
 		readonly List<string> keys = new List<string>() { "location.X", "location.Y" };
 		string pathToZip;
 		static string[] path;
 		public static string folderID;
 		string MegaLogin, MegaFolder, MegaPassword;
+		string defZIP, defEXT;
 		int count = 0;
 		NotifyIcon notifyIcon1 = new NotifyIcon();
 		NotifyIcon notifyIcon2 = new NotifyIcon();
@@ -74,138 +75,31 @@ namespace WPFInterface
 			openFile.FileOk += (sender, e) =>
 			{
 				path = openFile.FileNames;
-				ExtractZipAsync();
+				if (saveFlag == true)
+				{
+					DialogResult result = folderBrowserDialog1.ShowDialog();
+					if (result == System.Windows.Forms.DialogResult.OK)
+					{
+						ExtractZipAsync(folderBrowserDialog1.SelectedPath);
+					}
+				}
+				else if (defEXT != "")
+				{
+					ExtractZipAsync(defEXT);
+				}
+				else
+				{
+					DialogResult result = folderBrowserDialog1.ShowDialog();
+					if (result == System.Windows.Forms.DialogResult.OK)
+					{
+						ExtractZipAsync(folderBrowserDialog1.SelectedPath);
+					}
+				}
 			};
-			SaveFileDialog.FileOk += async (sender, e) =>
+			SaveFileDialog.FileOk += (sender, e) =>
 			{
-				if (chBox2.IsChecked == false)
-				{
-					pathToZip = SaveFileDialog.FileName;
-					Task task = new Task(MethodZip);
-					task.Start();
-
-					List<string> loadi = new List<string>
-					{
-						"Идёт сжатие",
-						".",
-						".",
-						"."
-					};
-					text1.Text = "";
-					do
-					{
-						foreach (var item in loadi)
-						{
-							text1.Text += item;
-							await Task.Delay(200);
-						}
-						text1.Text = "";
-
-					} while (!task.IsCompleted);
-
-					if (notifyFlag)
-					{
-						notifyIcon2.BalloonTipText = "Архив создан!";
-						notifyIcon2.BalloonTipTitle = "Финал";
-						notifyIcon2.BalloonTipIcon = ToolTipIcon.Info;
-						notifyIcon2.Icon = SystemIcons.Information;
-						notifyIcon2.Visible = true;
-						notifyIcon2.ShowBalloonTip(1000);
-						Process.Start("explorer.exe", $"/select, {SaveFileDialog.FileName}");
-					}
-					else
-					{
-						System.Windows.MessageBox.Show("Архив создан!", "Финал", MessageBoxButton.OK, MessageBoxImage.Information);
-						Process.Start("explorer.exe", $"/select, {SaveFileDialog.FileName}");
-					}
-				}
-
-				if (chBox2.IsChecked == true)
-				{
-					try
-					{
-						MegaApiClient megaApiClient = new MegaApiClient();
-						megaApiClient.Login(MegaLogin, MegaPassword);
-
-						pathToZip = SaveFileDialog.FileName;
-						Task task = new Task(MethodZip);
-						task.Start();
-
-						List<string> loadi = new List<string>
-						{
-							"Идёт сжатие",
-							".",
-							".",
-							"."
-						};
-						text1.Text = "";
-						do
-						{
-							foreach (var item in loadi)
-							{
-								text1.Text += item;
-								await Task.Delay(200);
-							}
-							text1.Text = "";
-
-						} while (!task.IsCompleted);
-
-						Task taskUploadToMega = new Task(() =>
-						{
-							IEnumerable<INode> node = megaApiClient.GetNodes();
-							INode folder = node.FirstOrDefault(n => n.Id == MegaFolder);
-							if (folder != null)
-							{
-								megaApiClient.UploadFile(SaveFileDialog.FileName, folder, null);
-							}
-							else
-							{
-								megaApiClient.UploadFile(SaveFileDialog.FileName, node.First(), null);
-							}
-						});
-						taskUploadToMega.Start();
-						List<string> upload = new List<string>
-						{
-							"Загрузка на Mega Drive",
-							".",
-							".",
-							"."
-						};
-						text1.Text = "";
-						do
-						{
-							foreach (var item in upload)
-							{
-								text1.Text += item;
-								await Task.Delay(200);
-							}
-							text1.Text = "";
-
-						} while (!taskUploadToMega.IsCompleted);
-
-						if (notifyFlag)
-						{
-							Process.Start("explorer.exe", $"/select, {SaveFileDialog.FileName}");
-							notifyIcon2.BalloonTipText = "Архив создан и загружен на Mega Drive!";
-							notifyIcon2.BalloonTipTitle = "Финал";
-							notifyIcon2.BalloonTipIcon = ToolTipIcon.Info;
-							notifyIcon2.Icon = SystemIcons.Information;
-							notifyIcon2.Visible = true;
-							notifyIcon2.ShowBalloonTip(1000);
-						}
-						else
-						{
-							System.Windows.MessageBox.Show("Архив создан и загружен на Mega Drive!", "Финал", MessageBoxButton.OK, MessageBoxImage.Information);
-							Process.Start("explorer.exe", $"/select, {SaveFileDialog.FileName}");
-						}
-					}
-					catch (Exception ex)
-					{
-						System.Windows.MessageBox.Show("При попытке доступа к Mega.io произошла ошибка. Проверьте в настрйках, правильно ли указан логин и пароль или повторите попытку позже." + ex.Message,
-							"Ошибка доступа", MessageBoxButton.OK, MessageBoxImage.Error);
-					}
-				}
-				text1.Text = "Перетащите в область для сжатия";
+				defZIP = Directory.GetParent(SaveFileDialog.FileName).FullName;
+				StartZip(Path.GetFileName(SaveFileDialog.FileName));
 			};
 			tab1.GotFocus += (sender, e) =>
 			{
@@ -242,7 +136,18 @@ namespace WPFInterface
 			MegaLogin = allAppSettings["MegaLogin"];
 			MegaFolder = allAppSettings["MegaFolder"];
 			MegaPassword = Cript.DeShifrovka(allAppSettings["MegaPassword"]);
+			defZIP = allAppSettings["defZIP"];
+			defEXT = allAppSettings["defEXT"];
 			string notify = allAppSettings["NotifyFlag"];
+			string save = allAppSettings["SaveFlag"];
+			if (save == "true")
+			{
+				saveFlag = true;
+			}
+			else
+			{
+				saveFlag = false;
+			}
 			if (notify == "true")
 			{
 				notifyFlag = true;
@@ -255,25 +160,64 @@ namespace WPFInterface
 
 		private void Border_Drop(object sender, System.Windows.DragEventArgs e)
 		{
+			string zipName;
 			path = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
-			if (path.Length == 1)
+			if (saveFlag == true)
 			{
-				string pathName = Path.GetFileName(path[0]);
-				string[] name = pathName.Split('.');
-				SaveFileDialog.FileName = name[0] + ".zip";
-				SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-				SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
-				SaveFileDialog.Title = "Путь к сохранению архива";
-				SaveFileDialog.ShowDialog();
+				if (path.Length == 1)
+				{
+					string pathName = Path.GetFileName(path[0]);
+					string[] name = pathName.Split('.');
+					SaveFileDialog.FileName = name[0] + ".zip";
+					SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+					SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
+					SaveFileDialog.Title = "Путь к сохранению архива";
+					SaveFileDialog.ShowDialog();
+				}
+				else
+				{
+					SaveFileDialog.FileName = Guid.NewGuid().ToString().Remove(0, 24);
+					SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+					SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
+					SaveFileDialog.Title = "Путь к сохранению архива";
+					SaveFileDialog.ShowDialog();
+
+				}
+			}
+			else if (defZIP != "")
+			{
+				if (path.Length == 1)
+				{
+					string pathName = Path.GetFileName(path[0]);
+					string[] name = pathName.Split('.');
+					zipName = name[0] + ".zip";
+				}
+				else
+				{
+					zipName = Guid.NewGuid().ToString().Remove(0, 24) + ".zip";
+				}
+				StartZip(zipName);
 			}
 			else
 			{
-				SaveFileDialog.FileName = Guid.NewGuid().ToString().Remove(0, 24);
-				SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-				SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
-				SaveFileDialog.Title = "Путь к сохранению архива";
-				SaveFileDialog.ShowDialog();
-
+				if (path.Length == 1)
+				{
+					string pathName = Path.GetFileName(path[0]);
+					string[] name = pathName.Split('.');
+					SaveFileDialog.FileName = name[0] + ".zip";
+					SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+					SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
+					SaveFileDialog.Title = "Путь к сохранению архива";
+					SaveFileDialog.ShowDialog();
+				}
+				else
+				{
+					SaveFileDialog.FileName = Guid.NewGuid().ToString().Remove(0, 24);
+					SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+					SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
+					SaveFileDialog.Title = "Путь к сохранению архива";
+					SaveFileDialog.ShowDialog();
+				}
 			}
 		}
 
@@ -290,7 +234,26 @@ namespace WPFInterface
 			if (path.Length == count)
 			{
 				count = 0;
-				ExtractZipAsync();
+				if (saveFlag == true)
+				{
+					DialogResult result = folderBrowserDialog1.ShowDialog();
+					if (result == System.Windows.Forms.DialogResult.OK)
+					{
+						ExtractZipAsync(folderBrowserDialog1.SelectedPath);
+					}
+				}
+				else if (defEXT != "")
+				{
+					ExtractZipAsync(defEXT);
+				}
+				else
+				{
+					DialogResult result = folderBrowserDialog1.ShowDialog();
+					if (result == System.Windows.Forms.DialogResult.OK)
+					{
+						ExtractZipAsync(folderBrowserDialog1.SelectedPath);
+					}
+				}
 			}
 			else
 			{
@@ -299,23 +262,22 @@ namespace WPFInterface
 			}
 		}
 
-		private async void ExtractZipAsync()
+		private async void ExtractZipAsync(string ExtractFolderPath)
 		{
-			folderBrowserDialog1.ShowDialog();
-			if (folderBrowserDialog1.SelectedPath != null)
+			if (ExtractFolderPath != null)
 			{
 				string pathToExtract;
 				if (path.Length == 1)
 				{
-					pathToExtract = folderBrowserDialog1.SelectedPath ?? "";
+					pathToExtract = ExtractFolderPath ?? "";
 					if (pathToExtract != "")
 					{
 						Task task = new Task(() =>
 						{
 							string[] nameFolder = Path.GetFileName(path[0]).Split('.');
-							//pathToExtract += $@"\{nameFolder[0]}";
+							pathToExtract += $@"\{nameFolder[0]}";
 							ZipFile.ExtractToDirectory(path[0], pathToExtract);
-							pathToExtract = folderBrowserDialog1.SelectedPath;
+							pathToExtract = ExtractFolderPath;
 						});
 						task.Start();
 
@@ -341,19 +303,19 @@ namespace WPFInterface
 							notifyIcon2.Icon = SystemIcons.Information;
 							notifyIcon2.Visible = true;
 							notifyIcon2.ShowBalloonTip(1000);
-							Process.Start("explorer.exe", $"/open, {folderBrowserDialog1.SelectedPath}");
+							Process.Start("explorer.exe", $"/open, {ExtractFolderPath}");
 						}
 						else
 						{
 							System.Windows.MessageBox.Show("Файлы извлечены", "Финал", MessageBoxButton.OK, MessageBoxImage.Information);
-							Process.Start("explorer.exe", $"/open, {folderBrowserDialog1.SelectedPath}");
+							Process.Start("explorer.exe", $"/open, {ExtractFolderPath}");
 						}
 
 					}
 				}
 				else
 				{
-					pathToExtract = folderBrowserDialog1.SelectedPath ?? "";
+					pathToExtract = ExtractFolderPath ?? "";
 					if (pathToExtract != "")
 					{
 						Task task = new Task(() =>
@@ -363,7 +325,7 @@ namespace WPFInterface
 								string[] nameFolder = Path.GetFileName(item).Split('.');
 								pathToExtract += $@"\{nameFolder[0]}";
 								ZipFile.ExtractToDirectory(item, pathToExtract);
-								pathToExtract = folderBrowserDialog1.SelectedPath;
+								pathToExtract = ExtractFolderPath;
 							}
 						});
 						task.Start();
@@ -390,12 +352,12 @@ namespace WPFInterface
 							notifyIcon2.Icon = SystemIcons.Information;
 							notifyIcon2.Visible = true;
 							notifyIcon2.ShowBalloonTip(1000);
-							Process.Start("explorer.exe", $"/open, {folderBrowserDialog1.SelectedPath}");
+							Process.Start("explorer.exe", $"/open, {ExtractFolderPath}");
 						}
 						else
 						{
 							System.Windows.MessageBox.Show("Файлы извлечены", "Финал", MessageBoxButton.OK, MessageBoxImage.Information);
-							Process.Start("explorer.exe", $"/open, {folderBrowserDialog1.SelectedPath}");
+							Process.Start("explorer.exe", $"/open, {ExtractFolderPath}");
 						}
 
 					}
@@ -455,6 +417,139 @@ namespace WPFInterface
 			}
 		}
 
+		async void StartZip(string arhiveName)
+		{
+			if (chBox2.IsChecked == false)
+			{
+				pathToZip = defZIP + $"\\{arhiveName}";
+				Task task = new Task(MethodZip);
+				task.Start();
+
+				List<string> loadi = new List<string>
+					{
+						"Идёт сжатие",
+						".",
+						".",
+						"."
+					};
+				text1.Text = "";
+				do
+				{
+					foreach (var item in loadi)
+					{
+						text1.Text += item;
+						await Task.Delay(200);
+					}
+					text1.Text = "";
+
+				} while (!task.IsCompleted);
+
+				if (notifyFlag)
+				{
+					notifyIcon2.BalloonTipText = "Архив создан!";
+					notifyIcon2.BalloonTipTitle = "Финал";
+					notifyIcon2.BalloonTipIcon = ToolTipIcon.Info;
+					notifyIcon2.Icon = SystemIcons.Information;
+					notifyIcon2.Visible = true;
+					notifyIcon2.ShowBalloonTip(1000);
+					Process.Start("explorer.exe", $"/select, {pathToZip}");
+				}
+				else
+				{
+					System.Windows.MessageBox.Show("Архив создан!", "Финал", MessageBoxButton.OK, MessageBoxImage.Information);
+					Process.Start("explorer.exe", $"/select, {pathToZip}");
+				}
+			}
+
+			if (chBox2.IsChecked == true)
+			{
+				try
+				{
+					MegaApiClient megaApiClient = new MegaApiClient();
+					await megaApiClient.LoginAsync(MegaLogin, MegaPassword);
+
+					pathToZip = defZIP + $"\\{arhiveName}";
+					Task task = new Task(MethodZip);
+					task.Start();
+
+					List<string> loadi = new List<string>
+						{
+							"Идёт сжатие",
+							".",
+							".",
+							"."
+						};
+					text1.Text = "";
+					do
+					{
+						foreach (var item in loadi)
+						{
+							text1.Text += item;
+							await Task.Delay(200);
+						}
+						text1.Text = "";
+
+					} while (!task.IsCompleted);
+
+					Task taskUploadToMega = new Task(() =>
+					{
+						IEnumerable<INode> node = megaApiClient.GetNodes();
+						INode folder = node.FirstOrDefault(n => n.Id == MegaFolder);
+						if (folder != null)
+						{
+							megaApiClient.UploadFile(pathToZip, folder, null);
+						}
+						else
+						{
+							megaApiClient.UploadFile(pathToZip, node.First(), null);
+						}
+					});
+					taskUploadToMega.Start();
+					List<string> upload = new List<string>
+						{
+							"Загрузка на Mega Drive",
+							".",
+							".",
+							"."
+						};
+					text1.Text = "";
+					do
+					{
+						foreach (var item in upload)
+						{
+							text1.Text += item;
+							await Task.Delay(200);
+						}
+						text1.Text = "";
+
+					} while (!taskUploadToMega.IsCompleted);
+					megaApiClient.Logout();
+
+					if (notifyFlag)
+					{
+						Process.Start("explorer.exe", $"/select, {pathToZip}");
+						notifyIcon2.BalloonTipText = "Архив создан и загружен на Mega Drive!";
+						notifyIcon2.BalloonTipTitle = "Финал";
+						notifyIcon2.BalloonTipIcon = ToolTipIcon.Info;
+						notifyIcon2.Icon = SystemIcons.Information;
+						notifyIcon2.Visible = true;
+						notifyIcon2.ShowBalloonTip(1000);
+					}
+					else
+					{
+						System.Windows.MessageBox.Show("Архив создан и загружен на Mega Drive!", "Финал", MessageBoxButton.OK, MessageBoxImage.Information);
+						Process.Start("explorer.exe", $"/select, {pathToZip}");
+					}
+				}
+				catch (Exception ex)
+				{
+					System.Windows.MessageBox.Show("При попытке доступа к Mega.io произошла ошибка. Проверьте в настрйках, правильно ли указан логин и пароль или повторите попытку позже." + ex.Message,
+						"Ошибка доступа", MessageBoxButton.OK, MessageBoxImage.Error);
+				}
+			}
+			text1.Text = "Перетащите в область для сжатия";
+		}
+
 		private void btn1_Click(object sender, RoutedEventArgs e)
 		{
 			System.Windows.Controls.ContextMenu context = FindResource("FileContext") as System.Windows.Controls.ContextMenu;
@@ -474,18 +569,39 @@ namespace WPFInterface
 
 		private void MenuItem_Click(object sender, RoutedEventArgs e)
 		{
+			string zipName;
 			folderBrowserDialog1.ShowDialog();
 			string pathAloneFolder = folderBrowserDialog1.SelectedPath ?? "";
 			path = new string[] { pathAloneFolder };
 			if (path[0] != "")
 			{
-				string pathName = Path.GetFileName(path[0]);
-				string[] name = pathName.Split('.');
-				SaveFileDialog.FileName = name[0] + ".zip";
-				SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-				SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
-				SaveFileDialog.Title = "Путь к сохранению архива";
-				SaveFileDialog.ShowDialog();
+				if (saveFlag == true)
+				{
+					string pathName = Path.GetFileName(path[0]);
+					string[] name = pathName.Split('.');
+					SaveFileDialog.FileName = name[0] + ".zip";
+					SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+					SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
+					SaveFileDialog.Title = "Путь к сохранению архива";
+					SaveFileDialog.ShowDialog();
+				}
+				else if (defZIP != "")
+				{
+					string pathName = Path.GetFileName(path[0]);
+					string[] name = pathName.Split('.');
+					zipName = name[0] + ".zip";
+					StartZip(zipName);
+				}
+				else
+				{
+					string pathName = Path.GetFileName(path[0]);
+					string[] name = pathName.Split('.');
+					SaveFileDialog.FileName = name[0] + ".zip";
+					SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+					SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
+					SaveFileDialog.Title = "Путь к сохранению архива";
+					SaveFileDialog.ShowDialog();
+				}
 			}
 			folderBrowserDialog1.Reset();
 		}
@@ -526,18 +642,39 @@ namespace WPFInterface
 
 		private void CreateZipClick(object sender, EventArgs e)
 		{
+			string zipName;
 			folderBrowserDialog1.ShowDialog();
 			string pathAloneFolder = folderBrowserDialog1.SelectedPath ?? "";
 			path = new string[] { pathAloneFolder };
 			if (path[0] != "")
 			{
-				string pathName = Path.GetFileName(path[0]);
-				string[] name = pathName.Split('.');
-				SaveFileDialog.FileName = name[0] + ".zip";
-				SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-				SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
-				SaveFileDialog.Title = "Путь к сохранению архива";
-				SaveFileDialog.ShowDialog();
+				if (saveFlag == true)
+				{
+					string pathName = Path.GetFileName(path[0]);
+					string[] name = pathName.Split('.');
+					SaveFileDialog.FileName = name[0] + ".zip";
+					SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+					SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
+					SaveFileDialog.Title = "Путь к сохранению архива";
+					SaveFileDialog.ShowDialog();
+				}
+				else if (defZIP != "")
+				{
+					string pathName = Path.GetFileName(path[0]);
+					string[] name = pathName.Split('.');
+					zipName = name[0] + ".zip";
+					StartZip(zipName);
+				}
+				else
+				{
+					string pathName = Path.GetFileName(path[0]);
+					string[] name = pathName.Split('.');
+					SaveFileDialog.FileName = name[0] + ".zip";
+					SaveFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+					SaveFileDialog.Filter = "zip files (*.zip)|*.zip|All files (*.*)|*.*";
+					SaveFileDialog.Title = "Путь к сохранению архива";
+					SaveFileDialog.ShowDialog();
+				}
 			}
 			folderBrowserDialog1.Reset();
 		}
