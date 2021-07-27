@@ -35,8 +35,8 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="104*"></RowDefinition>
-                        <RowDefinition Height="188*"></RowDefinition>
-                        <RowDefinition Height="49*"/>
+                        <RowDefinition Height="198*"></RowDefinition>
+                        <RowDefinition Height="39*"/>
                     </Grid.RowDefinitions>
                     <GroupBox x:Name="gbox1" Header="Уведомления" Margin="10">
                         <StackPanel>
@@ -53,13 +53,13 @@
                             <StackPanel Grid.Column="0">
                                 <RadioButton x:Name="rb3" Margin="10" Content="Указывать путь во время создания (извлечения) архива"></RadioButton>
                                 <RadioButton x:Name="rb4" Margin="10, 0" Content="Использовать путь указанный здесь"></RadioButton>
-                                <Label Content="Путь к сохранению архива:"></Label>
-                                <TextBox x:Name="defZIP"></TextBox>
-                                <Label Content="Путь к извлечению архива:"></Label>
-                                <TextBox x:Name="defEXT"></TextBox>
+                                <Label Margin="5,0,10,0" Content="Путь к сохранению архива:"></Label>
+                                <TextBox Margin="10,0,10,0" x:Name="defZIP"></TextBox>
+                                <Label Margin="5,0,10,0" Content="Путь к извлечению архива:"></Label>
+                                <TextBox Margin="10,0,10,0" x:Name="defEXT"></TextBox>
                             </StackPanel>
                             <StackPanel Grid.Column="1">
-                                <Button x:Name="btn2" Content="Обзор" Margin="10,75,10,15" Click="btn2_Click_1"/>
+                                <Button x:Name="btn2" Content="Обзор" Margin="10,74,10,15" Click="btn2_Click_1"/>
                                 <Button x:Name="btn3" Content="Обзор" Margin="10" Click="btn3_Click"/>
                             </StackPanel>
                         </Grid>
@@ -67,7 +67,7 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <Button x:Name="btn1" Grid.Row="2" Content="Применить" Margin="10,5" Grid.Column="2" Click="btn1_Click"></Button>
-        <Button x:Name="btn5" Grid.Row="2" Content="Сброс" Margin="10,5" Grid.Column="0" Click="btn5_Click"></Button>
+        <Button x:Name="btn1" Grid.Row="2" Content="Применить" Margin="10,0,10,10" Grid.Column="2" Click="btn1_Click"></Button>
+        <Button x:Name="btn5" Grid.Row="2" Content="Сброс" Margin="10,0,10,10" Grid.Column="0" Click="btn5_Click"></Button>
     </Grid>
 </Window>
