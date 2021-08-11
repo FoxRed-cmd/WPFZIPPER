@@ -104,8 +104,6 @@ D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Release\App.config
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Release\WPFInterface.exe.config
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Release\WPFInterface.exe
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Release\WPFInterface.pdb
-D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Release\MegaApiClient.dll
-D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Release\Newtonsoft.Json.dll
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Release\MegaApiClient.xml
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Release\Newtonsoft.Json.xml
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Release\WPFInterface.csproj.AssemblyReference.cache
@@ -126,3 +124,5 @@ D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Release\WPFInterface.csproj.
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Release\WPFInterface.csproj.CopyComplete
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Release\WPFInterface.exe
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Release\WPFInterface.pdb
+D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Release\System.Diagnostics.DiagnosticSource.xml
+D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Release\WPFInterface.csproj.Fody.CopyLocal.cache

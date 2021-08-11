@@ -36,6 +36,7 @@ namespace WPFInterface
 
 		NotifyIcon notifyIcon1 = new NotifyIcon();
 		NotifyIcon notifyIcon2 = new NotifyIcon();
+		MegaApiClient megaApiClient = new MegaApiClient();
 
 		OpenFileDialog openFile = new OpenFileDialog();
 		SaveFileDialog SaveFileDialog = new SaveFileDialog();
@@ -57,6 +58,10 @@ namespace WPFInterface
 			InitializeComponent();
 			Closing += (s, e) =>
 			{
+				if (megaApiClient.IsLoggedIn)
+				{
+					megaApiClient.Logout();
+				}
 				point = new System.Windows.Point(Top, Left);
 				List<string> values = new List<string>() { point.X.ToString(), point.Y.ToString() };
 				XmlDocument document = new XmlDocument();
@@ -506,9 +511,10 @@ namespace WPFInterface
 			{
 				try
 				{
-					MegaApiClient megaApiClient = new MegaApiClient();
-					await megaApiClient.LoginAsync(MegaLogin, MegaPassword);
-
+					if (!megaApiClient.IsLoggedIn)
+					{
+						await megaApiClient.LoginAsync(MegaLogin, MegaPassword);
+					}
 					pathToZip = defZIP + $"\\{arhiveName}";
 					Task task = new Task(MethodZip);
 					task.Start();
@@ -564,7 +570,6 @@ namespace WPFInterface
 						text1.Text = "";
 
 					} while (!taskUploadToMega.IsCompleted);
-					megaApiClient.Logout();
 
 					if (notifyFlag)
 					{

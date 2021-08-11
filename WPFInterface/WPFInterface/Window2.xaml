@@ -23,7 +23,7 @@
                 CornerRadius="10" Grid.ColumnSpan="2" Grid.RowSpan="4">
                 
             </Border>
-            <Image Source="maxresdefault.jpg" Grid.ColumnSpan="2" Margin="10"/>
+            <Image Source="Alice.png" Grid.ColumnSpan="2" Margin="10"/>
             <StackPanel x:Name="sp1" Grid.Row="1" Grid.Column="0" Grid.RowSpan="2">
                 <TextBlock x:Name="tx1" Margin="10,5" Text="Название продукта: "></TextBlock>
                 <TextBlock x:Name="tx2" Margin="10,5" Text="Версия: "></TextBlock>

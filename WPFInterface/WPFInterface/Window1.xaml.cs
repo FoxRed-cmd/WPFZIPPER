@@ -14,7 +14,7 @@ namespace WPFInterface
 	/// </summary>
 	public partial class Window1 : Window
 	{
-		OpenFileDialog OpenFileDialog = new OpenFileDialog();
+		OpenFileDialog OpenFileDialog = null;
 		FolderBrowserDialog FolderBrowserDialog = new FolderBrowserDialog();
 		public string FolderID { get; set; }
 		string key3 = "NotifyFlag";
@@ -155,6 +155,7 @@ namespace WPFInterface
 
 		private void btn2_Click(object sender, RoutedEventArgs e)
 		{
+			OpenFileDialog = new OpenFileDialog();
 			OpenFileDialog.InitialDirectory = System.Windows.Forms.Application.StartupPath;
 			OpenFileDialog.ShowDialog();
 		}
