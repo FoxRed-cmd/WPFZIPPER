@@ -124,7 +124,6 @@ D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Debug\WPFInterface.csproj.Co
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Debug\WPFInterface.csproj.CopyComplete
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Debug\WPFInterface.exe
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Debug\WPFInterface.pdb
-D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Debug\WPFInterface.csproj.AssemblyReference.cache
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Debug\Newtonsoft.Json.xml
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\bin\Debug\System.Diagnostics.DiagnosticSource.xml
 D:\Projects\WPFZIPPER\WPFInterface\WPFInterface\obj\Debug\WPFInterface.csproj.Fody.CopyLocal.cache

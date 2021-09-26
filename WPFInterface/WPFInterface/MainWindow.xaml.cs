@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
+using System.Windows.Threading;
 using System.Xml;
 
 namespace WPFInterface
@@ -25,6 +26,7 @@ namespace WPFInterface
 		System.Windows.Point point;
 		bool notifyFlag, saveFlag;
 
+		string[] args;
 		string pathToZip;
 		static string[] path;
 		public static string folderID;
@@ -56,6 +58,7 @@ namespace WPFInterface
 		public MainWindow()
 		{
 			InitializeComponent();
+			args = Environment.GetCommandLineArgs();
 			Closing += (s, e) =>
 			{
 				if (megaApiClient.IsLoggedIn)
@@ -134,6 +137,40 @@ namespace WPFInterface
 			contextMenu.Items.Add("Выход", Properties.Resources.free_icon_logout_5087631, ExitClick);
 			notifyIcon1.Icon = Properties.Resources.free_icon_zip_1243480 as Icon;
 			notifyIcon1.ContextMenuStrip = contextMenu;
+			_ = Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(() =>
+			  {
+				  try
+				  {
+					  if (args.Length > 1)
+					  {
+						  tab2.Focus();
+						  path = new string[0];
+						  foreach (string item in args)
+						  {
+							  if (item.Contains(".zip"))
+							  {
+								  path = path.Append(item).ToArray();
+							  }
+						  }
+						  if (defEXT != "" && path.Length != 0)
+						  {
+							  ExtractZipAsync(defEXT);
+						  }
+						  else if (defEXT == "" && path.Length != 0)
+						  {
+							  DialogResult result = folderBrowserDialog1.ShowDialog();
+							  if (result == System.Windows.Forms.DialogResult.OK)
+							  {
+								  ExtractZipAsync(folderBrowserDialog1.SelectedPath);
+							  }
+						  }
+					  }
+				  }
+				  catch (Exception)
+				  {
+					  System.Windows.MessageBox.Show("Что-то пошло не так...\nВозможно архив запаролен.", "Folder Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				  }
+			  }));
 		}
 
 		private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -676,6 +713,11 @@ namespace WPFInterface
 		private void ExitClick(object sender, EventArgs e)
 		{
 			Close();
+		}
+
+		private void Window_ContentRendered(object sender, EventArgs e)
+		{
+			
 		}
 
 		private void ExtractZipClick(object sender, EventArgs e)

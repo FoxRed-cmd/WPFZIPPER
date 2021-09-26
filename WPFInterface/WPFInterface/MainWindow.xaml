@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFInterface"
         mc:Ignorable="d"
-        Title="Молния" MinWidth="320" MinHeight="350" Height="420" Width="400" Background="#FF4D5AAC" SizeChanged="Window_SizeChanged" Loaded="Window_Loaded">
+        Title="Молния" MinWidth="320" MinHeight="350" Height="420" Width="400" Background="#FF4D5AAC" SizeChanged="Window_SizeChanged" Loaded="Window_Loaded" ContentRendered="Window_ContentRendered">
     <Window.Resources>
         <ContextMenu x:Key="FileContext">
             <MenuItem Header="Создать ZIP" Click="MenuItem_Click">
