@@ -469,6 +469,10 @@ namespace WPFInterface
 						}
 						pathToZip = pathToZip + ".zip";
 					}
+					else
+					{
+						break;
+					}
 				} while (true);
 
 				if (Directory.Exists(path[0]) && path.Length == 1)
