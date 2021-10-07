@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Win32;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Diagnostics;
@@ -14,7 +15,7 @@ namespace WPFInterface
 	/// </summary>
 	public partial class Window1 : Window
 	{
-		OpenFileDialog OpenFileDialog = null;
+		System.Windows.Forms.OpenFileDialog OpenFileDialog = null;
 		FolderBrowserDialog FolderBrowserDialog = new FolderBrowserDialog();
 		public string FolderID { get; set; }
 		string key3 = "NotifyFlag";
@@ -55,6 +56,7 @@ namespace WPFInterface
 			string saveChecked = allAppSettings[key7];
 			defZIP.Text = allAppSettings[key8];
 			defEXT.Text = allAppSettings[key9];
+
 			if (saveChecked == "true")
 			{
 				rb3.IsChecked = true;
@@ -73,6 +75,7 @@ namespace WPFInterface
 				btn2.IsEnabled = true;
 				btn3.IsEnabled = true;
 			}
+
 			if (notifyChecked == "true")
 			{
 				rb1.IsChecked = true;
@@ -148,6 +151,8 @@ namespace WPFInterface
 					element7.SetAttribute("value", "false");
 				}
 			}
+			MainWindow main = (MainWindow)Owner;
+			main.args = null;
 			document.Save(Assembly.GetExecutingAssembly().Location + ".config");
 			System.Windows.Application.Current.Shutdown();
 			System.Windows.Forms.Application.Restart();
@@ -155,7 +160,7 @@ namespace WPFInterface
 
 		private void btn2_Click(object sender, RoutedEventArgs e)
 		{
-			OpenFileDialog = new OpenFileDialog();
+			OpenFileDialog = new System.Windows.Forms.OpenFileDialog();
 			OpenFileDialog.InitialDirectory = System.Windows.Forms.Application.StartupPath;
 			OpenFileDialog.ShowDialog();
 		}

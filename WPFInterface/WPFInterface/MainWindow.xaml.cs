@@ -26,7 +26,7 @@ namespace WPFInterface
 		System.Windows.Point point;
 		bool notifyFlag, saveFlag;
 
-		string[] args;
+		public string[] args;
 		string pathToZip;
 		static string[] path;
 		public static string folderID;
@@ -58,6 +58,7 @@ namespace WPFInterface
 		public MainWindow()
 		{
 			InitializeComponent();
+			args = null;
 			args = Environment.GetCommandLineArgs();
 			Closing += (s, e) =>
 			{
@@ -453,6 +454,23 @@ namespace WPFInterface
 		{
 			if (pathToZip != null)
 			{
+				int numberZip = 0;
+				do
+				{
+					numberZip++;
+					if (File.Exists(pathToZip))
+					{
+						pathToZip = pathToZip.Replace(".zip", "");
+						pathToZip = pathToZip.Replace($"({numberZip})", "");
+						if (!File.Exists(pathToZip + $" ({numberZip}).zip"))
+						{
+							pathToZip = pathToZip + $" ({numberZip}).zip";
+							break;
+						}
+						pathToZip = pathToZip + ".zip";
+					}
+				} while (true);
+
 				if (Directory.Exists(path[0]) && path.Length == 1)
 				{
 					ZipFile.CreateFromDirectory(path[0], pathToZip, CompressionLevel.Optimal, true);
@@ -718,6 +736,11 @@ namespace WPFInterface
 		private void Window_ContentRendered(object sender, EventArgs e)
 		{
 			
+		}
+
+		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			args = null;
 		}
 
 		private void ExtractZipClick(object sender, EventArgs e)
